@@ -163,6 +163,7 @@
 ### 완성된 1차 모형
 
 ![image](https://user-images.githubusercontent.com/84000959/122225301-e76b3300-ceef-11eb-8263-847226aba7a6.png)
+![image](https://user-images.githubusercontent.com/70736001/123329781-23e60100-d578-11eb-9377-3ce0dedcf387.png)
 
 
 
