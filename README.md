@@ -159,7 +159,7 @@
 
 ### 완성된 1차 모형 (폴리시 부착, 이동 및 컨텍스트 매핑(점선은 Pub/Sub, 실선은 Req/Resp))
 
-![image](https://user-images.githubusercontent.com/70736001/123329781-23e60100-d578-11eb-9377-3ce0dedcf387.png)
+![image](https://user-images.githubusercontent.com/70736001/123493812-a47c2e80-d658-11eb-93d7-e8626964c708.png)
 
 
 
