@@ -125,17 +125,19 @@
 
 ### 액터, 커맨드 부착하여 읽기 좋게
 
-![5  액터, 커맨드 부착하여 읽기 좋게](https://user-images.githubusercontent.com/84000922/122162413-80795a00-ceae-11eb-9b06-668274f351f7.png)
+![image](https://user-images.githubusercontent.com/70736001/123490795-f8cee080-d64f-11eb-8e39-6fe159059e57.png)
 
 
 
 
 ### 어그리게잇으로 묶기
 
-![6  어그리게잇으로 묶기](https://user-images.githubusercontent.com/84000922/122162415-80795a00-ceae-11eb-8b57-846e1779e420.png)
+![image](https://user-images.githubusercontent.com/70736001/123490936-6713a300-d650-11eb-8121-8efdf1ffae89.png)
+
+
 
 ```
-- 입찰관리, 입찰참여, 입찰심사는 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌
+- - 수강과목관리, 수강신청, 수강확정은 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌
 ```
 
 
@@ -143,27 +145,20 @@
 
 ### 바운디드 컨텍스트로 묶기
 
-![7  바운디드 컨텍스트로 묶기](https://user-images.githubusercontent.com/84000922/122162416-8111f080-ceae-11eb-87be-10c03082eab2.png)
+![image](https://user-images.githubusercontent.com/70736001/123491286-50ba1700-d651-11eb-8b9e-a849ab97baf3.png)
 
 ```
 도메인 서열 분리
-- Core Domain: 입찰관리, 입찰참여: 없어서는 안될 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 입찰관리배포주기는 1개월 1회 미만, 입찰참여 배포주기는 1주일 1회 미만
- - Supporting Domain: 입찰심사 : 경쟁력을 내기 위한 서비스이며, SLA 수준은 연간 60% 이상 uptime 목표, 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함. 
+- Core Domain: 수강과목관리, 수강신청: 없어서는 안될 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 수강과목관리의 배포주기는 1개월 1회 미만, 수강신청의 배포주기는 1주일 1회 미만
+ - Supporting Domain: 수강확정 : 경쟁력을 내기 위한 서비스이며, SLA 수준은 연간 70% 이상 uptime 목표, 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함. 
 - General Domain: Notification : 알림서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 (핑크색으로 이후 전환할 예정)
 ```
 
 
 
 
-### 폴리시 부착, 이동 및 컨텍스트 매핑(점선은 Pub/Sub, 실선은 Req/Resp)
+### 완성된 1차 모형 (폴리시 부착, 이동 및 컨텍스트 매핑(점선은 Pub/Sub, 실선은 Req/Resp))
 
-![image](https://user-images.githubusercontent.com/84000959/122225382-fc47c680-ceef-11eb-859f-70c06e195310.png)
-
-
-
-### 완성된 1차 모형
-
-![image](https://user-images.githubusercontent.com/84000959/122225301-e76b3300-ceef-11eb-8263-847226aba7a6.png)
 ![image](https://user-images.githubusercontent.com/70736001/123329781-23e60100-d578-11eb-9377-3ce0dedcf387.png)
 
 
