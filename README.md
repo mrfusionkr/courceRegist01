@@ -94,7 +94,7 @@
 
 ### TO-BE 조직 (Vertically-Aligned)
 
-![2  TO-BE 조직](https://user-images.githubusercontent.com/84000922/122162398-7c4d3c80-ceae-11eb-88b9-863f1e58ba41.png)
+![image](https://user-images.githubusercontent.com/70736001/123484664-b2738480-d643-11eb-8702-b108816413f1.png)
 
 
 
@@ -103,14 +103,15 @@
 
 ### 이벤트 도출
 
-![3  이벤트 도출](https://user-images.githubusercontent.com/84000922/122162410-7fe0c380-ceae-11eb-9822-adb2c3b8d62a.png)
+![image](https://user-images.githubusercontent.com/70736001/123488247-7d1e6500-d64a-11eb-8012-064282c34ba0.png)
+
 
 
 
 
 ### 부적격 이벤트 탈락
 
-![4  부적격 이벤트 탈락](https://user-images.githubusercontent.com/84000922/122162412-7fe0c380-ceae-11eb-8aba-20f04b2a4dbb.png)
+![image](https://user-images.githubusercontent.com/70736001/123488211-6415b400-d64a-11eb-990e-0c40c2bd91e7.png)
 
 ```
 - 과정중 도출된 잘못된 도메인 이벤트들을 걸러내는 작업을 수행
