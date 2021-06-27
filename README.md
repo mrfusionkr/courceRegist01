@@ -382,23 +382,60 @@ http GET http://localhost:8081/courseManagements/1
 ![image](https://user-images.githubusercontent.com/70736001/123549913-f8e0f480-d7a5-11eb-83af-369db3133772.png)
 
 1-1.교과관리 서비스에서 입찰공고 등록 >> 담당교수신청 DB에 교과정보가 자동 등록됨(Async-Policy)
+```
+http GET http://localhost:8082/professorApplyments
+```
+![image](https://user-images.githubusercontent.com/70736001/123550049-8fadb100-d7a6-11eb-8461-dd82fe2067ae.png)
+
 
 2.담당교수신청 서비스에서 담당교수 신청 등록(Command-PATCH)
+```
+http PATCH http://localhost:8082/professorApplyments/1 professorNo=201 professorNm=P01 phoneNumber=000-0000-0001 age=40 career=15 professorSpec=TEST
+http GET http://localhost:8082/professorApplyments/1
+```
+![image](https://user-images.githubusercontent.com/70736001/123550122-021e9100-d7a7-11eb-8b5a-286d0796c6ea.png)
 
 2-1. 담당교수신청 서비스에서 담당교수 신청 등록 >> 담당교수평가 DB에 신청정보 자동 등록됨(Async-Policy)
+```
+http GET http://localhost:8083/professorEvaluations/2
+```
+![image](https://user-images.githubusercontent.com/70736001/123550169-4ca00d80-d7a7-11eb-82fd-92f87146a808.png)
 
 2-1. 담당교수신청 서비스에서 담당교수 신청 등록 >> nofication DB에 SMS 발송이력 자동 등록됨(Async-Policy)
+```
+http GET http://localhost:8084/smsHistories/2
+```
+![image](https://user-images.githubusercontent.com/70736001/123550267-bddfc080-d7a7-11eb-8ff1-b1e8a6d12944.png)
+
 
 3.담당교수평가 서비스에서 평가결과 등록(Command-PATCH)
+```
+http PATCH http://localhost:8083/professorEvaluations/2 successFlag=true
+```
+![image](https://user-images.githubusercontent.com/70736001/123550332-026b5c00-d7a8-11eb-89e2-b6aceb799b14.png)
 
 3-1. 담당교수신청 서비스에서 담당교수 신청 등록 >> 교과관리 DB에 담당교수 정보가 자동 등록됨(Sync-Req/Res)
+```
+http GET http://localhost:8081/courseManagements/1
+```
+![image](https://user-images.githubusercontent.com/70736001/123550383-29299280-d7a8-11eb-8363-0c66a3727aaa.png)
 
-3-1. 담당교수신청 서비스에서 담당교수 신청 등록 >> 교과관리 서비스 Down(CTRL+C) 시 담당교수평가 서비스의 평가결과 등록도 실패
+3-2. 담당교수신청 서비스에서 담당교수 신청 등록 >> 교과관리 서비스 Down(CTRL+C) 시 담당교수평가 서비스의 평가결과 등록도 실패
 
-4. MyPage-진행현황 조회(CQRS)
 
-5. Gateway-담당교수선정 진행 현황 조회(Gateway 8088 포트로 진입점 통일)
+4.MyPage-진행현황 조회(CQRS)
+```
+http GET http://localhost:8085/applyStatusInquiries/2
+```
+![image](https://user-images.githubusercontent.com/70736001/123550676-a7d2ff80-d7a9-11eb-8bd2-77841e0acf53.png)
 
+
+5.Gateway-담당교수선정 진행 현황 조회(Gateway 8088 포트로 진입점 통일)
+```
+http GET http://localhost:8088/applyStatusInquiries/2
+```
+![image](https://user-images.githubusercontent.com/70736001/123550572-224f4f80-d7a9-11eb-8c9a-2701b308293f.png)
+![image](https://user-images.githubusercontent.com/70736001/123550597-31360200-d7a9-11eb-8e75-2173e86c5851.png)
 
 ![image](https://user-images.githubusercontent.com/84000959/122253612-47b99f00-cf07-11eb-85c1-bc9736d97ec9.png)
 
