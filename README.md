@@ -227,19 +227,19 @@
 (서비스 별 포트) 분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트 등으로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 8085, 8088 이다)
 
 ```
-cd BiddingManagement
+cd courseManagement
 mvn spring-boot:run
 
-cd BiddingParticipation
+cd professorApplyment
 mvn spring-boot:run 
 
-cd BiddingExamination
+cd professorEvaluation
 mvn spring-boot:run  
 
-cd Notification
+cd notification
 mvn spring-boot:run
 
-cd MyPage
+cd myPage
 mvn spring-boot:run
 
 cd gateway
@@ -248,53 +248,51 @@ mvn spring-boot:run
 
 ## DDD 의 적용
 
-- (Entity 예시) 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (아래 예시는 입찰관리 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다.
+- (Entity 예시) 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (아래 예시는 교과관리 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다.
 
 ```
-package bidding;
+package professor;
 
 import javax.persistence.*;
 import org.springframework.beans.BeanUtils;
 import java.util.Date;
 
 @Entity
-@Table(name="BiddingManagement_table")
-public class BiddingManagement {
+@Table(name="CourseManagement_table")
+public class CourseManagement {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private String noticeNo;
+    private Long courseNo;
     private String title;
     private Date dueDate;
-    private Integer price;
-    private String demandOrgNm;
-    private String bizInfo;
-    private String qualifications;
-    private String succBidderNm;
+    private String courseInfo;
+    private Boolean successFlag;
+    private Long professorNo;
+    private String professorNm;
     private String phoneNumber;
 
     @PostPersist
     public void onPostPersist(){
-        NoticeRegistered noticeRegistered = new NoticeRegistered();
-        BeanUtils.copyProperties(this, noticeRegistered);
-        noticeRegistered.publishAfterCommit();
+        CourseRegisted courseRegisted = new CourseRegisted();
+        BeanUtils.copyProperties(this, courseRegisted);
+        courseRegisted.publishAfterCommit();
     }
 
     @PostUpdate
     public void onPostUpdate(){
-        SuccessBidderRegistered successBidderRegistered = new SuccessBidderRegistered();
-        BeanUtils.copyProperties(this, successBidderRegistered);
-        successBidderRegistered.publishAfterCommit();
+        CourseCompleted courseCompleted = new CourseCompleted();
+        BeanUtils.copyProperties(this, courseCompleted);
+        courseCompleted.publishAfterCommit();
     }
 
     @PostRemove
     public void onPostRemove(){
-        NoticeCanceled noticeCanceled = new NoticeCanceled();
-        BeanUtils.copyProperties(this, noticeCanceled);
-        noticeCanceled.publishAfterCommit();
+        CourseCanceled courseCanceled = new CourseCanceled();
+        BeanUtils.copyProperties(this, courseCanceled);
+        courseCanceled.publishAfterCommit();        
     }
-
 
     public Long getId() {
         return id;
@@ -303,12 +301,12 @@ public class BiddingManagement {
     public void setId(Long id) {
         this.id = id;
     }
-    public String getNoticeNo() {
-        return noticeNo;
+    public Long getCourseNo() {
+        return courseNo;
     }
 
-    public void setNoticeNo(String noticeNo) {
-        this.noticeNo = noticeNo;
+    public void setCourseNo(Long courseNo) {
+        this.courseNo = courseNo;
     }
     public String getTitle() {
         return title;
@@ -324,42 +322,34 @@ public class BiddingManagement {
     public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
     }
-    public Integer getPrice() {
-        return price;
+    public String getCourseInfo() {
+        return courseInfo;
     }
 
-    public void setPrice(Integer price) {
-        this.price = price;
+    public void setCourseInfo(String courseInfo) {
+        this.courseInfo = courseInfo;
     }
-    public String getDemandOrgNm() {
-        return demandOrgNm;
-    }
-
-    public void setDemandOrgNm(String demandOrgNm) {
-        this.demandOrgNm = demandOrgNm;
-    }
-    public String getBizInfo() {
-        return bizInfo;
+    public Boolean getSuccessFlag() {
+        return successFlag;
     }
 
-    public void setBizInfo(String bizInfo) {
-        this.bizInfo = bizInfo;
+    public void setSuccessFlag(Boolean successFlag) {
+        this.successFlag = successFlag;
     }
-    public String getQualifications() {
-        return qualifications;
-    }
-
-    public void setQualifications(String qualifications) {
-        this.qualifications = qualifications;
-    }
-    public String getSuccBidderNm() {
-        return succBidderNm;
+    public Long getProfessorNo() {
+        return professorNo;
     }
 
-    public void setSuccBidderNm(String succBidderNm) {
-        this.succBidderNm = succBidderNm;
+    public void setProfessorNo(Long professorNo) {
+        this.professorNo = professorNo;
     }
-    
+    public String getProfessorNm() {
+        return professorNm;
+    }
+
+    public void setProfessorNm(String professorNm) {
+        this.professorNm = professorNm;
+    }
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -367,20 +357,18 @@ public class BiddingManagement {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
-
 }
 ```
 - (Repository 예시) Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
 ```
-package bidding;
+package professor;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@RepositoryRestResource(collectionResourceRel="biddingManagements", path="biddingManagements")
-public interface BiddingManagementRepository extends PagingAndSortingRepository<BiddingManagement, Long>{
-
-    BiddingManagement findByNoticeNo(String noticeNo);
+@RepositoryRestResource(collectionResourceRel="courseManagements", path="courseManagements")
+public interface CourseManagementRepository extends PagingAndSortingRepository<CourseManagement, Long>{
+    CourseManagement findByCourseNo(Long courseNo);
 }
 ```
 
@@ -415,7 +403,7 @@ public interface BiddingManagementRepository extends PagingAndSortingRepository<
 # pom.xml
 <dependency>
 	<groupId>org.hsqldb</groupId>
-    	<artifactId>hsqldb</artifactId>
+	<artifactId>hsqldb</artifactId>
 	<scope>runtime</scope>
 </dependency>
 ```
@@ -436,32 +424,46 @@ public interface BiddingManagementRepository extends PagingAndSortingRepository<
 
 - (동기호출-Req)낙찰자정보 등록 서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
 ```
-# (BiddingExamination) BiddingManagementService.java
-package bidding.external;
+# (ProfessorEvaluation) CourseManagementService.java
+package professor.external;
 
-@FeignClient(name="BiddingManagement", url="http://${api.url.bidding}:8080", fallback=BiddingManagementServiceFallback.class)
-public interface BiddingManagementService {
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
-    @RequestMapping(method= RequestMethod.GET, path="/biddingManagements/registSucessBidder")
-    public boolean registSucessBidder(@RequestParam("noticeNo") String noticeNo,
-    @RequestParam("succBidderNm") String succBidderNm, @RequestParam("phoneNumber") String phoneNumber);
-
+@FeignClient(name="courseManagement", url="http://localhost:8081", fallback=CourseCreationServiceFallback.class)
+public interface CourseManagementService {
+    @RequestMapping(method= RequestMethod.GET, path="/courseManagements/completeCourse")
+    public boolean completeCourse(@RequestParam("courseNo") Long courseNo
+                            , @RequestParam("professorNo") Long professNo
+                            , @RequestParam("professorNm") String professNm
+                            , @RequestParam("phoneNumber") String phoneNumber
+    );
 }
 ```
 
 - (Fallback) 낙찰자정보 등록 서비스가 정상적으로 호출되지 않을 경우 Fallback 처리
 ```
-# (BiddingExamination) BiddingManagementServiceFallback.java
-package bidding.external;
+# (ProfessorEvaluation) CourseCreationServiceFallback.java
+package professor.external;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class BiddingManagementServiceFallback implements BiddingManagementService{
+public class CourseCreationServiceFallback implements CourseManagementService{
 
     @Override
-    public boolean registSucessBidder(String noticeNo,String succBidderNm, String phoneNumber){
-        System.out.println("★★★★★★★★★★★Circuit breaker has been opened. Fallback returned instead.★★★★★★★★★★★");
+    public boolean completeCourse (Long courseNo, Long professorNo, String professorNm, String phoneNumber){
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        System.out.println("@@@@@@@@@@@@@@Circuit Breaker is Running!! Fallback Returned Value.@@@@@@@@@@@@@@@");
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
         return false;
     }
 }
@@ -473,64 +475,87 @@ feign:
     enabled: true
 ```
 
-- (동기호출-Res) 낙찰자자정보 등록 서비스 (정상 호출)
+- (동기호출-Res) 담당교수 선정결과 등록 서비스 (정상 호출)
 ```
-# (BiddingManagement) BiddingManagementController.java
-package bidding;
+# (CourseManagement) CourseManagementController.java
+package professor;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
  @RestController
- public class BiddingManagementController {
-
+ public class CourseManagementController {
     @Autowired
-    BiddingManagementRepository biddingManagementRepository;
+    CourseManagementRepository courseManagementRepository;
 
-    @RequestMapping(value = "/biddingManagements/registSucessBidder",
+    @RequestMapping(value = "/courseManagements/completeCourse",
        method = RequestMethod.GET,
        produces = "application/json;charset=UTF-8")
-    public boolean registSucessBidder(HttpServletRequest request, HttpServletResponse response) {
+    public boolean completeCourse(HttpServletRequest request, HttpServletResponse response) {
        boolean status = false;
 
-       String noticeNo = String.valueOf(request.getParameter("noticeNo"));
+       Long courseNo = Long.valueOf(request.getParameter("courseNo"));
+       Long professorNo = Long.valueOf(request.getParameter("professorNo"));
        
-       BiddingManagement biddingManagement = biddingManagementRepository.findByNoticeNo(noticeNo);
+       CourseManagement courseManagement = courseManagementRepository.findByCourseNo(courseNo);
 
-       if(biddingManagement.getDemandOrgNm() == null || "조달청".equals(biddingManagement.getDemandOrgNm()) == false){
-            biddingManagement.setSuccBidderNm(request.getParameter("succBidderNm"));
-            biddingManagement.setPhoneNumber(request.getParameter("phoneNumber"));
+       System.out.println("@@@@@@@@@@@@@@@@@courseManagement.courseNo@" + Long.toString(courseManagement.getCourseNo()));
+ 
+       if(courseManagement.getProfessorNo() == null || courseManagement.getProfessorNo() != professorNo){
+            System.out.println("과목에 교수정보 저장");
+            courseManagement.setProfessorNo(professorNo);
+            courseManagement.setProfessorNm(request.getParameter("professorNm"));
+            courseManagement.setPhoneNumber(request.getParameter("phoneNumber"));
+            courseManagement.setSuccessFlag(true);
 
-            biddingManagementRepository.save(biddingManagement);
-
+            courseManagementRepository.save(courseManagement);
             status = true;
        }
-
        return status;
     }
-
  }
 ```
 
-- (동기호출-PostUpdate) 심사결과가 등록된 직후(@PostUpdate) 낙찰자정보 등록을 요청하도록 처리 (낙찰자가 아닌 경우, 이후 로직 스킵)
+- (동기호출-PostUpdate) 평가결과가 등록 된 직후(@PostUpdate) 담당교수정보 등록을 요청하도록 처리 (담당교수가 이미 있거나, 동일한 사람이면 이후 로직 스킵)
 ```
-# BiddingExamination.java (Entity)
-
+# ProfessorEvaluation.java (Entity)
     @PostUpdate
-    public void onPostUpdate(){
-        // 낙찰업체가 아니면 Skip.
-        if(getSuccessBidderFlag() == false) return;
+    public void onPostUpdate() throws Exception{
+        // 수강 확정 조건이 충족되지 않으면 확정하지 않는다.
+        System.out.print("getSuccessFlag() = " + this.getSuccessFlag().toString());
+        if (getSuccessFlag() == false){
+            return;
+        }
 
         try{
-            // mappings goes here
-            boolean isUpdated = BiddingExaminationApplication.applicationContext.getBean(bidding.external.BiddingManagementService.class)
-            .registSucessBidder(getNoticeNo(), getCompanyNm(), getPhoneNumber());
+            boolean isUpdateYn = ProfessorEvaluationApplication.applicationContext.getBean(professor.external.CourseManagementService.class)
+                .completeCourse(getCourseNo(), getProfessorNo(), getProfessorNm(), getPhoneNumber());
 
-            if(isUpdated == false){
-                throw new Exception("입찰관리 서비스의 입찰공고에 낙찰자 정보가 갱신되지 않음");
+            if (isUpdateYn == false){
+                throw new Exception ("수강과목 등록의 수강자 정보가 업데이트 되지 않음");
             }
-        }catch(java.net.ConnectException ce){
-            throw new Exception("입찰관리 서비스 연결 실패");
-        }catch(Exception e){
-            throw new Exception("입찰관리 서비스 처리 실패");
+
+            ProfessorConfirmed professorConfirmed = new ProfessorConfirmed();
+            BeanUtils.copyProperties(this, professorConfirmed);
+            professorConfirmed.publishAfterCommit();
+        } catch (ConnectException ce){
+            try {
+                throw new Exception ("수강과목 등록 서비스 연결 실패");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e){
+            try {
+                throw new Exception ("수강과목 등록 서비스 실행 실패");
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
         }
+    }
 ```
 
 - (동기호출-테스트) 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 입찰관리 시스템이 장애가 나면 입찰심사 등록도 못 한다는 것을 확인:
@@ -563,15 +588,15 @@ http PATCH http://localhost:8083/biddingExaminations/1 noticeNo=n01 participateN
  
 ```
 @Entity
-@Table(name="BiddingManagement_table")
-public class BiddingManagement {
+@Table(name="CourseManagement_table")
+public class CourseManagement {
 
  ...
     @PostPersist
     public void onPostPersist(){
-        NoticeRegistered noticeRegistered = new NoticeRegistered();
-        BeanUtils.copyProperties(this, noticeRegistered);
-        noticeRegistered.publishAfterCommit();
+        CourseRegisted courseRegisted = new CourseRegisted();
+        BeanUtils.copyProperties(this, courseRegisted);
+        courseRegisted.publishAfterCommit();
     }
 ```
 - (Subscribe-등록) 입찰참여 서비스에서는 입찰공고 등록됨 이벤트를 수신하면 입찰공고 번호를 등록하는 정책을 처리하도록 PolicyHandler를 구현한다:
@@ -581,16 +606,16 @@ public class BiddingManagement {
 public class PolicyHandler{
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverNoticeRegistered_RecieveBiddingNotice(@Payload NoticeRegistered noticeRegistered){
+    public void wheneverCourseRegisted_ReceiveCourseNotice(@Payload CourseRegisted courseRegisted){
 
-        if(!noticeRegistered.validate()) return;
+        if(!courseRegisted.validate()) return;
+        
+        System.out.println("\n\n##### listener ReceiveCourseNotice : " + courseRegisted.toJson() + "\n\n");
+	
+        ProfessorApplyment professorApplyment = new ProfessorApplyment();
+        professorApplyment.setCourseNo(courseRegisted.getCourseNo());
 
-        if(noticeRegistered.isMe()){
-            BiddingParticipation biddingParticipation = new BiddingParticipation();
-            biddingParticipation.setNoticeNo(noticeRegistered.getNoticeNo());
-
-            biddingParticipationRepository.save(biddingParticipation);
-        }
+        professorApplymentRepository.save(professorApplyment);        
     }
 
 ```
@@ -599,18 +624,17 @@ public class PolicyHandler{
 ```
 @Service
 public class PolicyHandler{
-    @Autowired BiddingParticipationRepository biddingParticipationRepository;
+    @Autowired ProfessorApplymentRepository professorApplymentRepository;
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverNoticeCanceled_CancelBiddingParticipation(@Payload NoticeCanceled noticeCanceled){
+    public void wheneverCourseCanceled_CancelApplyment(@Payload CourseCanceled courseCanceled){
 
-        if(!noticeCanceled.validate()) return;
+        if(!courseCanceled.validate()) return;
+        
+        System.out.println("\n\n##### listener CancelApplyment : " + courseCanceled.toJson() + "\n\n");
+        ProfessorApplyment professorApplyment = professorApplymentRepository.findByCourseNo(courseCanceled.getCourseNo());
 
-        if(noticeCanceled.isMe()){
-            BiddingParticipation biddingParticipation = biddingParticipationRepository.findByNoticeNo(noticeCanceled.getNoticeNo());
-            biddingParticipationRepository.delete(biddingParticipation);
-        }
-            
+        professorApplymentRepository.delete(professorApplyment);
     }
 
 ```
