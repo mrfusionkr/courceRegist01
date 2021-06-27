@@ -374,6 +374,32 @@ public interface CourseManagementRepository extends PagingAndSortingRepository<C
 
 - 적용 후 REST API 의 테스트
 
+1.교과관리 서비스에서 교과목 등록(Command-POST)
+```
+http POST http://localhost:8081/courseManagements courseNo=1 title=국어 courseInfo=국어과목 dueDate=2021-07-01
+http GET http://localhost:8081/courseManagements/1
+```
+![image](https://user-images.githubusercontent.com/70736001/123549913-f8e0f480-d7a5-11eb-83af-369db3133772.png)
+
+1-1.교과관리 서비스에서 입찰공고 등록 >> 담당교수신청 DB에 교과정보가 자동 등록됨(Async-Policy)
+
+2.담당교수신청 서비스에서 담당교수 신청 등록(Command-PATCH)
+
+2-1. 담당교수신청 서비스에서 담당교수 신청 등록 >> 담당교수평가 DB에 신청정보 자동 등록됨(Async-Policy)
+
+2-1. 담당교수신청 서비스에서 담당교수 신청 등록 >> nofication DB에 SMS 발송이력 자동 등록됨(Async-Policy)
+
+3.담당교수평가 서비스에서 평가결과 등록(Command-PATCH)
+
+3-1. 담당교수신청 서비스에서 담당교수 신청 등록 >> 교과관리 DB에 담당교수 정보가 자동 등록됨(Sync-Req/Res)
+
+3-1. 담당교수신청 서비스에서 담당교수 신청 등록 >> 교과관리 서비스 Down(CTRL+C) 시 담당교수평가 서비스의 평가결과 등록도 실패
+
+4. MyPage-진행현황 조회(CQRS)
+
+5. Gateway-담당교수선정 진행 현황 조회(Gateway 8088 포트로 진입점 통일)
+
+
 ![image](https://user-images.githubusercontent.com/84000959/122253612-47b99f00-cf07-11eb-85c1-bc9736d97ec9.png)
 
 ![image](https://user-images.githubusercontent.com/84000959/122253640-5011da00-cf07-11eb-8b8d-b954879ab902.png)
