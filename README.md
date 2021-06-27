@@ -452,9 +452,14 @@ http GET http://localhost:8088/applyStatusInquiries/2
 	<scope>runtime</scope>
 </dependency>
 ```
-![image](https://user-images.githubusercontent.com/84000959/122328060-e7a81480-cf69-11eb-9955-954f88b7ec1b.png)
+HSQL DB에 SMS 발송이력 저장됨
+```
+http GET http://localhost:8084/smsHistories/2
+```
+![image](https://user-images.githubusercontent.com/70736001/123551654-bb806500-d7ad-11eb-9121-7f1493042b92.png)
 
-- 입찰관리, 입찰참여, 입찰심사 등 나머지 서비스는 H2 DB를 사용한다.
+
+- 교과관리, 담당교수신청, 담당교수평가 등 나머지 서비스는 H2 DB를 사용한다.
 ```
 <dependency>
 	<groupId>com.h2database</groupId>
