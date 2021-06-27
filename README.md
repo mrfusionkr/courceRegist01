@@ -401,7 +401,7 @@ http GET http://localhost:8083/professorEvaluations/2
 ```
 ![image](https://user-images.githubusercontent.com/70736001/123550169-4ca00d80-d7a7-11eb-82fd-92f87146a808.png)
 
-2-1. 담당교수신청 서비스에서 담당교수 신청 등록 >> nofication DB에 SMS 발송이력 자동 등록됨(Async-Policy)
+2-2. 담당교수신청 서비스에서 담당교수 신청 등록 >> nofication DB에 SMS 발송이력 자동 등록됨(Async-Policy)
 ```
 http GET http://localhost:8084/smsHistories/2
 ```
@@ -410,9 +410,9 @@ http GET http://localhost:8084/smsHistories/2
 
 3.담당교수평가 서비스에서 평가결과 등록(Command-PATCH)
 ```
-http PATCH http://localhost:8083/professorEvaluations/2 successFlag=true
+http PATCH http://localhost:8083/professorEvaluations/2 successFlag=true score=85
 ```
-![image](https://user-images.githubusercontent.com/70736001/123550332-026b5c00-d7a8-11eb-89e2-b6aceb799b14.png)
+![image](https://user-images.githubusercontent.com/70736001/123551557-4dd43900-d7ad-11eb-8d81-0bb60ab65a05.png)
 
 3-1. 담당교수신청 서비스에서 담당교수 신청 등록 >> 교과관리 DB에 담당교수 정보가 자동 등록됨(Sync-Req/Res)
 ```
@@ -421,7 +421,10 @@ http GET http://localhost:8081/courseManagements/1
 ![image](https://user-images.githubusercontent.com/70736001/123550383-29299280-d7a8-11eb-8363-0c66a3727aaa.png)
 
 3-2. 담당교수신청 서비스에서 담당교수 신청 등록 >> 교과관리 서비스 Down(CTRL+C) 시 담당교수평가 서비스의 평가결과 등록도 실패
-
+```
+http PATCH http://localhost:8083/professorEvaluations/2 professorNo=203 successFlag=true score=90
+```
+![image](https://user-images.githubusercontent.com/70736001/123551489-f635cd80-d7ac-11eb-9349-e7a2ae0b4ac4.png)
 
 4.MyPage-진행현황 조회(CQRS)
 ```
@@ -436,27 +439,6 @@ http GET http://localhost:8088/applyStatusInquiries/2
 ```
 ![image](https://user-images.githubusercontent.com/70736001/123550572-224f4f80-d7a9-11eb-8c9a-2701b308293f.png)
 ![image](https://user-images.githubusercontent.com/70736001/123550597-31360200-d7a9-11eb-8e75-2173e86c5851.png)
-
-![image](https://user-images.githubusercontent.com/84000959/122253612-47b99f00-cf07-11eb-85c1-bc9736d97ec9.png)
-
-![image](https://user-images.githubusercontent.com/84000959/122253640-5011da00-cf07-11eb-8b8d-b954879ab902.png)
-
-![image](https://user-images.githubusercontent.com/84000959/122253676-586a1500-cf07-11eb-8d1a-7b7b966a27bf.png)
-
-![image](https://user-images.githubusercontent.com/84000959/122253698-5ef88c80-cf07-11eb-8b40-5ae0ccbbd91e.png)
-
-![image](https://user-images.githubusercontent.com/84000959/122327901-9f88f200-cf69-11eb-8aa7-3edffac01e7a.png)
-
-![image](https://user-images.githubusercontent.com/84000959/122253729-66b83100-cf07-11eb-8d38-bfb30aabfa7e.png)
-
-![image](https://user-images.githubusercontent.com/84000959/122253779-720b5c80-cf07-11eb-88c7-8e6c687c63a3.png)
-
-![image](https://user-images.githubusercontent.com/84000959/122253810-79cb0100-cf07-11eb-8557-fad7d460bd75.png)
-
-![image](https://user-images.githubusercontent.com/84000959/122331399-b5011a80-cf6f-11eb-8cdc-27bd84ef5cfd.png)
-
-![image](https://user-images.githubusercontent.com/84000959/122337586-7f612f00-cf79-11eb-94cd-d5af9ff136de.png)
-
 
 ## 폴리글랏 퍼시스턴스
 
