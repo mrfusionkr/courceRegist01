@@ -94,7 +94,7 @@
 
 ### TO-BE 조직 (Vertically-Aligned)
 
-![image](https://user-images.githubusercontent.com/70736001/123484664-b2738480-d643-11eb-8702-b108816413f1.png)
+![image](https://user-images.githubusercontent.com/70736001/124369828-23054b80-dcab-11eb-9ddb-cec3eb901dfd.png)
 
 
 
@@ -103,7 +103,7 @@
 
 ### 이벤트 도출
 
-![image](https://user-images.githubusercontent.com/70736001/123488247-7d1e6500-d64a-11eb-8012-064282c34ba0.png)
+![image](https://user-images.githubusercontent.com/70736001/124369844-45976480-dcab-11eb-98d0-cce84b32e0a3.png)
 
 
 
@@ -111,13 +111,13 @@
 
 ### 부적격 이벤트 탈락
 
-![image](https://user-images.githubusercontent.com/70736001/123488211-6415b400-d64a-11eb-990e-0c40c2bd91e7.png)
+![image](https://user-images.githubusercontent.com/70736001/124369857-68297d80-dcab-11eb-93aa-4e01f674f302.png)
 
 ```
 - 과정중 도출된 잘못된 도메인 이벤트들을 걸러내는 작업을 수행
-- 수강 이의 제기등록됨 : 후행 시나리오라서 제외
-- 우선순위점수등록됨 : 속성 정보여서 제외
-- 수강신청메뉴선택됨, 등록금 납부현황 조회됨 : UI 의 이벤트이지, 업무적인 의미의 이벤트가 아니라서 제외  
+- 확정 이의 제기등록됨, 담당조교 등록 : 후행 시나리오라서 제외
+- 교수등급 등록됨 : 속성 정보여서 제외
+- 교수신청메뉴선택됨, 등급현황 조회됨 : UI 의 이벤트이지, 업무적인 의미의 이벤트가 아니라서 제외 
 ```
 
 
