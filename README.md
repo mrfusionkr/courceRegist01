@@ -602,17 +602,18 @@ import javax.servlet.http.HttpServletResponse;
 - (동기호출-테스트) 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 입찰관리 시스템이 장애가 나면 입찰심사 등록도 못 한다는 것을 확인:
 
 ```
-#교과관리(BiddingManagement) 서비스를 잠시 내려놓음 (ctrl+c)
+#교과관리(courseManagement) 서비스를 잠시 내려놓음 (ctrl+c)
 
 #담당교수확정결과 등록 : Fail
-http PATCH http://localhost:8083/biddingExaminations/1 noticeNo=n01 participateNo=p01 successBidderFlag=true
+http PATCH http://localhost:8083/professorEvaluations/2 successFlag=true score=85
 
-#교과관리 서비스 재기동
+#교과관리 서비스 재기동 및 교과목 재등록
 cd courseManagement
 mvn spring-boot:run
+http POST http://localhost:8081/courseManagements courseNo=1 title=국어 courseInfo=국어과목 dueDate=2021-07-01
 
 #심사결과 등록 : Success
-http PATCH http://localhost:8083/biddingExaminations/1 noticeNo=n01 participateNo=p01 successBidderFlag=true
+http PATCH http://localhost:8083/professorEvaluations/2 successFlag=true score=85
 ```
 
 - 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. (서킷브레이커, 폴백 처리는 운영단계에서 설명한다.)
@@ -623,9 +624,9 @@ http PATCH http://localhost:8083/biddingExaminations/1 noticeNo=n01 participateN
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
 
-입찰공고가 등록된 후에 입찰참여 시스템에 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 입찰참여 시스템의 처리를 위하여 입찰공고 트랜잭션이 블로킹 되지 않도록 처리한다.
+교과목이 등록된 후에 담당교수신청 시스템에 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 담당교수신청 시스템의 처리를 위하여 교과등록 트랜잭션이 블로킹 되지 않도록 처리한다.
  
-- (Publish) 이를 위하여 입찰공고 기록을 남긴 후에 곧바로 등록 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+- (Publish) 이를 위하여 교과등록 기록을 남긴 후에 곧바로 등록 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```
 @Entity
@@ -640,7 +641,7 @@ public class CourseManagement {
         courseRegisted.publishAfterCommit();
     }
 ```
-- (Subscribe-등록) 입찰참여 서비스에서는 입찰공고 등록됨 이벤트를 수신하면 입찰공고 번호를 등록하는 정책을 처리하도록 PolicyHandler를 구현한다:
+- (Subscribe-등록) 담당교수신청 서비스에서는 교과등록됨 이벤트를 수신하면 담당교수신청 번호를 등록하는 정책을 처리하도록 PolicyHandler를 구현한다:
 
 ```
 @Service
@@ -660,7 +661,7 @@ public class PolicyHandler{
     }
 
 ```
-- (Subscribe-취소) 입찰참여 서비스에서는 입찰공고가 취소됨 이벤트를 수신하면 입찰참여 정보를 삭제하는 정책을 처리하도록 PolicyHandler를 구현한다:
+- (Subscribe-취소) 담당교수신청 서비스에서는 교과가 취소됨 이벤트를 수신하면 담당교수신청 정보를 삭제하는 정책을 처리하도록 PolicyHandler를 구현한다:
   
 ```
 @Service
@@ -680,27 +681,28 @@ public class PolicyHandler{
 
 ```
 
-- (장애격리) 입찰관리, 입찰참여 시스템은 입찰심사 시스템과 완전히 분리되어 있으며, 이벤트 수신에 따라 처리되기 때문에, 입찰심사 시스템이 유지보수로 인해 잠시 내려간 상태라도 입찰관리, 입찰참여 서비스에 영향이 없다:
+- (장애격리) 교과관리, 담당교수신청 시스템은 담당교수평가 시스템과 완전히 분리되어 있으며, 이벤트 수신에 따라 처리되기 때문에, 담당교수평가 시스템이 유지보수로 인해 잠시 내려간 상태라도 교과관리, 담당교수신청 서비스에 영향이 없다:
 ```
-# 입찰심사 서비스 (BiddingExamination) 를 잠시 내려놓음 (ctrl+c)
+# 담당교수평가 서비스 (professorEvaluation) 를 잠시 내려놓음 (ctrl+c)
 
-#입찰공고 등록 : Success
-http POST localhost:8081/biddingManagements noticeNo=n33 title=title33
-#입찰참여 등록 : Success
-http PATCH http://localhost:8082/biddingParticipations/2 noticeNo=n33 participateNo=p33 companyNo=c33 companyNm=doremi33 phoneNumber=010-1234-1234
+#교괴등록 : Success
+http POST http://localhost:8081/courseManagements courseNo=1 title=국어 courseInfo=국어과목 dueDate=2021-07-01
+#담당교수신청 등록 : Success
+http PATCH http://localhost:8082/professorApplyments/1 professorNo=201 professorNm=P01 phoneNumber=000-0000-0001 age=40 career=15 professorSpec=TEST
 
-#입찰관리에서 낙찰업체명 갱신 여부 확인
-http localhost:8081/biddingManagements/2     # 낙찰업체명 갱신 안 됨 확인
+#교과등록에서 교과목 등록 및 담당교수 신청 등록 확인
+http GET http://localhost:8081/courseManagements/1     # 교과목 등록 됨확인
+http GET http://localhost:8082/professorApplyments/1   # 담당교수신청 등록 됨확인
 
-#입찰심사 서비스 기동
-cd BiddingExamination
+#담당교수평가 서비스 기동
+cd professorEvaluation
 mvn spring-boot:run
 
-#심사결과 등록 : Success
-http PATCH http://localhost:8083/biddingExaminations/2 noticeNo=n33 participateNo=p33 successBidderFlag=true
+#담당교수확정 등록 : Success
+http PATCH http://localhost:8083/professorEvaluations/2 successFlag=true score=85
 
-#입찰관리에서 낙찰업체명 갱신 여부 확인
-http localhost:8081/biddingManagements/2     # 낙찰업체명 갱신됨 확인
+#교과관리에서 담당교수정보 갱신 여부 확인
+http GET http://localhost:8081/courseManagements/1     # 담당교수정보 갱신됨 확인
 ```
 
 # 운영:
