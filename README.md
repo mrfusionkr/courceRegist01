@@ -380,7 +380,7 @@ http GET http://localhost:8081/courseManagements/1
 ```
 ![image](https://user-images.githubusercontent.com/70736001/123549913-f8e0f480-d7a5-11eb-83af-369db3133772.png)
 
-1-1.교과관리 서비스에서 입찰공고 등록 >> 담당교수신청 DB에 교과정보가 자동 등록됨(Async-Policy)
+1-1.교과관리 서비스에서 담당교수신청공고 등록 >> 담당교수신청 DB에 교과정보가 자동 등록됨(Async-Policy)
 ```
 http GET http://localhost:8082/professorApplyments
 ```
@@ -432,7 +432,7 @@ http GET http://localhost:8085/applyStatusInquiries/2
 ![image](https://user-images.githubusercontent.com/70736001/123550676-a7d2ff80-d7a9-11eb-8bd2-77841e0acf53.png)
 
 
-5.Gateway-담당교수선정 진행 현황 조회(Gateway 8088 포트로 진입점 통일)
+5.Gateway-담당교수확정 진행 현황 조회(Gateway 8088 포트로 진입점 통일)
 ```
 http GET http://localhost:8088/applyStatusInquiries/2
 ```
@@ -469,7 +469,7 @@ http GET http://localhost:8084/smsHistories/2
 
 ## 동기식 호출 과 Fallback 처리
 
-분석단계에서의 조건 중 하나로 심사결과등록(입찰심사)->낙찰자정보등록(입찰관리) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
+분석단계에서의 조건 중 하나로 교수확정결과등록(교수평가)->담당교수정보등록(교과관리) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
 
 - (동기호출-Req)낙찰자정보 등록 서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
 ```
@@ -492,7 +492,7 @@ public interface CourseManagementService {
 }
 ```
 
-- (Fallback) 낙찰자정보 등록 서비스가 정상적으로 호출되지 않을 경우 Fallback 처리
+- (Fallback) 담당교수정보 등록 서비스가 정상적으로 호출되지 않을 경우 Fallback 처리
 ```
 # (ProfessorEvaluation) CourseCreationServiceFallback.java
 package professor.external;
@@ -569,12 +569,12 @@ import javax.servlet.http.HttpServletResponse;
  }
 ```
 
-- (동기호출-PostUpdate) 평가결과가 등록 된 직후(@PostUpdate) 담당교수정보 등록을 요청하도록 처리 (담당교수가 이미 있거나, 동일한 사람이면 이후 로직 스킵)
+- (동기호출-PreUpdate) 평가결과가 등록 된 직후(@PostUpdate) 담당교수정보 등록을 요청하도록 처리 (담당교수가 이미 있거나, 동일한 사람이면 이후 로직 스킵)
 ```
 # ProfessorEvaluation.java (Entity)
-    @PostUpdate
-    public void onPostUpdate() throws Exception{
-        // 수강 확정 조건이 충족되지 않으면 확정하지 않는다.
+    @PreUpdate
+    public void onPreUpdate() throws Exception{
+        // 담당교수 확정 조건이 충족되지 않으면 확정하지 않는다.
         System.out.print("getSuccessFlag() = " + this.getSuccessFlag().toString());
         if (getSuccessFlag() == false){
             return;
@@ -585,24 +585,16 @@ import javax.servlet.http.HttpServletResponse;
                 .completeCourse(getCourseNo(), getProfessorNo(), getProfessorNm(), getPhoneNumber());
 
             if (isUpdateYn == false){
-                throw new Exception ("수강과목 등록의 수강자 정보가 업데이트 되지 않음");
+                throw new Exception ("교과등록의 담당교수 정보가 업데이트 되지 않음");
             }
 
             ProfessorConfirmed professorConfirmed = new ProfessorConfirmed();
             BeanUtils.copyProperties(this, professorConfirmed);
             professorConfirmed.publishAfterCommit();
         } catch (ConnectException ce){
-            try {
-                throw new Exception ("수강과목 등록 서비스 연결 실패");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            throw new Exception ("교과 등록 서비스 연결 실패");
         } catch (Exception e){
-            try {
-                throw new Exception ("수강과목 등록 서비스 실행 실패");
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
+            throw new Exception ("교과 등록 서비스 실행 실패");
         }
     }
 ```
@@ -610,13 +602,13 @@ import javax.servlet.http.HttpServletResponse;
 - (동기호출-테스트) 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 입찰관리 시스템이 장애가 나면 입찰심사 등록도 못 한다는 것을 확인:
 
 ```
-# 입찰관리(BiddingManagement) 서비스를 잠시 내려놓음 (ctrl+c)
+#교과관리(BiddingManagement) 서비스를 잠시 내려놓음 (ctrl+c)
 
-#심사결과 등록 : Fail
+#담당교수확정결과 등록 : Fail
 http PATCH http://localhost:8083/biddingExaminations/1 noticeNo=n01 participateNo=p01 successBidderFlag=true
 
-#입찰관리 서비스 재기동
-cd BiddingManagement
+#교과관리 서비스 재기동
+cd courseManagement
 mvn spring-boot:run
 
 #심사결과 등록 : Success
