@@ -111,7 +111,7 @@
 
 ### 부적격 이벤트 탈락
 
-![image](https://user-images.githubusercontent.com/70736001/124369857-68297d80-dcab-11eb-93aa-4e01f674f302.png)
+![image](https://user-images.githubusercontent.com/70736001/124370045-9b6d0c00-dcad-11eb-99c4-ba94ef261469.png)
 
 ```
 - 과정중 도출된 잘못된 도메인 이벤트들을 걸러내는 작업을 수행
@@ -125,19 +125,19 @@
 
 ### 액터, 커맨드 부착하여 읽기 좋게
 
-![image](https://user-images.githubusercontent.com/70736001/123490795-f8cee080-d64f-11eb-8e39-6fe159059e57.png)
+![image](https://user-images.githubusercontent.com/70736001/124370049-a889fb00-dcad-11eb-97d4-c268f71ddd22.png)
 
 
 
 
 ### 어그리게잇으로 묶기
 
-![image](https://user-images.githubusercontent.com/70736001/123490936-6713a300-d650-11eb-8121-8efdf1ffae89.png)
+![image](https://user-images.githubusercontent.com/70736001/124370051-bfc8e880-dcad-11eb-82d8-e3ba4cb3bdfd.png)
 
 
 
 ```
-- 수강과목관리, 수강신청, 수강확정은 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌
+- 교과관리, 담당교수신청, 담당교수확정은 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌
 ```
 
 
@@ -145,12 +145,12 @@
 
 ### 바운디드 컨텍스트로 묶기
 
-![image](https://user-images.githubusercontent.com/70736001/123491286-50ba1700-d651-11eb-8b9e-a849ab97baf3.png)
+![image](https://user-images.githubusercontent.com/70736001/124370058-da02c680-dcad-11eb-9b0a-082768424a01.png)
 
 ```
 도메인 서열 분리
-- Core Domain: 수강과목관리, 수강신청: 없어서는 안될 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 수강과목관리의 배포주기는 1개월 1회 미만, 수강신청의 배포주기는 1주일 1회 미만
-- Supporting Domain: 수강확정 : 경쟁력을 내기 위한 서비스이며, SLA 수준은 연간 70% 이상 uptime 목표, 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함. 
+- Core Domain: 교과관리, 담당교수신청: 없어서는 안될 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 교과관리의 배포주기는 1개월 1회 미만, 담당교수신청의 배포주기는 1주일 1회 미만
+ - Supporting Domain: 담당교수확정 : 경쟁력을 내기 위한 서비스이며, SLA 수준은 연간 70% 이상 uptime 목표, 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함. 
 - General Domain: Notification : 알림서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 (핑크색으로 이후 전환할 예정)
 ```
 
@@ -159,18 +159,18 @@
 
 ### 완성된 1차 모형 (폴리시 부착, 이동 및 컨텍스트 매핑(점선은 Pub/Sub, 실선은 Req/Resp))
 
-![image](https://user-images.githubusercontent.com/70736001/123493812-a47c2e80-d658-11eb-93d7-e8626964c708.png)
+![image](https://user-images.githubusercontent.com/70736001/124370073-07e80b00-dcae-11eb-9d31-13bde9f7eebd.png)
 
 
 
 ### 1차 완성본에 대한 기능적 요구사항을 커버하는지 검증 (1/2)
 
-![image](https://user-images.githubusercontent.com/70736001/123494093-a09cdc00-d659-11eb-87c5-c44f6f9bcb1a.png)
+![image](https://user-images.githubusercontent.com/70736001/124370104-90ff4200-dcae-11eb-97a5-b203d920849a.png)
 
 ```
-1) 교수는 수강과목을 등록한다. 수강과목을 등록하면 수강신청공고가 접수된다.
-2) 학생은 수강신청을 등록한다. 수강신청이 등록되면 수강확정이 접수(등록)된다.
-3) 수강부서는 수강확정을 등록한다. 심사확정이 등록되면 수강과목에  수강생 정보가 등록(공지)된다.
+1) 교과담당은 교과목을 등록한다. 교과목을 등록하면 담당교수신청공고가 접수된다.
+2) 교수는 담당교수 신청을 등록한다. 담당교수신청이 등록되면 담당교수확정이 접수(등록)된다.
+3) 평가부서는 담당교수확정을 등록한다. 담당교수확정이 등록되면 해당과목에 담당교수 정보가 등록(공지)된다.
 ```
 
 
@@ -178,14 +178,13 @@
 
 ### 1차 완성본에 대한 기능적 요구사항을 커버하는지 검증 (2/2)
 
-![image](https://user-images.githubusercontent.com/70736001/123494313-5536fd80-d65a-11eb-9776-27b164b43193.png)
+![image](https://user-images.githubusercontent.com/70736001/124370163-2ac6ef00-dcaf-11eb-9a54-4696b2f62273.png)
 
 ```
-1) 교수는 수강과목등록을 취소 할 수 있다. 
-    수강과목 등록이 취소되면 수강신청등록 및 수강확정도 취소된다.
-2) 수강신청, 수강신청 취소, 수강확정 시 
-     학생에게 SMS를 발송한다.
-3) 학생은 수강신청현황을 조회 할 수 있다.
+1) 교과담당은 교과등록을 취소 할 수 있다. 
+    교과등록이 취소되면 담당교수신청등록 및 담당교수확정도 취소된다.
+2) 수강신청, 수강신청 취소, 수강확정 시 교수에게 SMS를 발송한다.
+3) 교수는 담당교수신청현황을 조회 할 수 있다.
 ```
 
 
@@ -193,18 +192,18 @@
 
 ### 1차 완성본에 대한 비기능적 요구사항을 커버하는지 검증
 
-![image](https://user-images.githubusercontent.com/70736001/123494485-f3c35e80-d65a-11eb-9246-aaeffffb9c21.png)
+![image](https://user-images.githubusercontent.com/70736001/124370204-b0e33580-dcaf-11eb-8cb0-baaa5cafe791.png)
 
 ```
 1. 트랜잭션
-  - 수강확정결과가 등록되면 수강과목에 수강자 정보가 등록되어야 한다. (Sync 호출)
+  - 담당교수확정결과가 등록되면 교과에 담당교수 정보가 등록되어야 한다. (Sync 호출)
 2. 장애격리
-  - 수강과목등록 기능이 수행되지 않더라도 수강신청 기능은 24시간 받을 수 있어야 한다. 
+  - 교과등록 기능이 수행되지 않더라도 담당교수신청 기능은 24시간 받을 수 있어야 한다. 
     Async (event-driven), Eventual Consistency
-  - 수강신청 기능이 과중되면 사용자를 잠시 동안 받지 않고 예약을 잠시후에 하도록 유도한다.
+  - 담당교수신청 기능이 과중 되면 사용자를 잠시 동안 받지 않고 예약을 잠시후에 하도록 유도한다.
     Circuit breaker, fallback
 3. 성능
-  - 학생은 MyPage 화면에서 수강신청 상태를 확인 할 수 있어야 한다.CQRS - 조회전용 서비스
+  - 교수는 MyPage 화면에서 담당교수신청 상태를 확인 할 수 있어야 한다.CQRS - 조회전용 서비스
 ```
 
 
@@ -212,7 +211,7 @@
 
 ### 헥사고날 아키텍처 다이어그램 도출
 
-![image](https://user-images.githubusercontent.com/70736001/123494701-bd3a1380-d65b-11eb-96f0-eae79c3aed51.png)
+![image](https://user-images.githubusercontent.com/70736001/124370263-64e4c080-dcb0-11eb-9807-5e49c9a936a8.png)
 
 
 
