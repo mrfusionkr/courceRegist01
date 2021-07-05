@@ -1000,56 +1000,44 @@ watch kubectl get all
 쿠버네티스는 각 컨테이너의 상태를 주기적으로 체크(Health Check)해서 문제가 있는 컨테이너는 서비스에서 제외한다.
 
 - deployment.yml에 readinessProbe 설정 후 미설정 상태 테스트를 위해 주석처리함 
-```
-readinessProbe:
-httpGet:
-  path: '/biddingManagements'
-  port: 8080
-initialDelaySeconds: 10
-timeoutSeconds: 2
-periodSeconds: 5
-failureThreshold: 10
-```
+![image](https://user-images.githubusercontent.com/70736001/124522931-db5bfc80-de2f-11eb-9d9a-c4fce7046b00.png)
 
 - deployment.yml에서 readinessProbe 미설정 상태로 siege 부하발생
-
-![image](https://user-images.githubusercontent.com/70736001/122505873-2906f580-d038-11eb-86b8-2f8388f82dd1.png)
-
 ```
-kubectl exec -it pod/siege  -c siege -n bidding -- /bin/bash
-siege -c100 -t5S -v --content-type "application/json" 'http://20.194.120.4:8080/biddingManagements POST {"noticeNo":1,"title":"AAA"}
+kubectl exec -it pod/siege -c siege -n professor -- /bin/bash
+siege -c50 -t30S -v --content-type "application/json" 'http://courseManagement:8080/courseManagements POST {"courseNo":1,"title":"국어","courseInfo":"국어과목","dueDate":"2021-07-10"}'
 ```
 1.부하테스트 전
 
-![image](https://user-images.githubusercontent.com/70736001/122506020-75eacc00-d038-11eb-99df-4a4b90478bc3.png)
+![image](https://user-images.githubusercontent.com/70736001/124522962-ffb7d900-de2f-11eb-9f27-7a7f2d707d51.png)
 
 2.부하테스트 후
 
-![image](https://user-images.githubusercontent.com/70736001/122506060-84d17e80-d038-11eb-8449-b94b28a0f385.png)
+![image](https://user-images.githubusercontent.com/70736001/124522970-06465080-de30-11eb-94a8-2147ec982184.png)
 
 3.생성중인 Pod 에 대한 요청이 들어가 오류발생
 
-![image](https://user-images.githubusercontent.com/70736001/122506129-a03c8980-d038-11eb-8822-5ec57926b900.png)
+![image](https://user-images.githubusercontent.com/70736001/124522976-0cd4c800-de30-11eb-8cd5-de3602a86962.png)
 
-- 정상 실행중인 biddingmanagement으로의 요청은 성공(201),비정상 적인 요청은 실패(503 - Service Unavailable) 확인
+- 정상 실행중인 biddingmanagement으로의 요청은 성공(201),비정상 적인 요청은 실패 확인
 
 - hpa 설정에 의해 target 지수 초과하여 biddingmanagement scale-out 진행됨
 
 - deployment.yml에 readinessProbe 설정 후 부하발생 및 Availability 100% 확인
 
-![image](https://user-images.githubusercontent.com/70736001/122506358-2527a300-d039-11eb-84cb-62eb09687bda.png)
+![image](https://user-images.githubusercontent.com/70736001/124523280-67baef00-de31-11eb-874e-4f8924b31d5d.png)
 
 1.부하테스트 전
 
-![image](https://user-images.githubusercontent.com/70736001/122506400-3c669080-d039-11eb-8e5e-a4f76b0e2956.png)
+![image](https://user-images.githubusercontent.com/70736001/124523293-70132a00-de31-11eb-8e2a-358646ff6b4e.png)
 
 2.부하테스트 후
 
-![image](https://user-images.githubusercontent.com/70736001/122506421-4be5d980-d039-11eb-92a2-44e7827299bf.png)
+![image](https://user-images.githubusercontent.com/70736001/124523299-799c9200-de31-11eb-94b3-6edeb958150e.png)
 
 3.readiness 정상 적용 후, Availability 100% 확인
 
-![image](https://user-images.githubusercontent.com/70736001/122506471-61f39a00-d039-11eb-9077-608f375e27f3.png)
+![image](https://user-images.githubusercontent.com/70736001/124523304-8325fa00-de31-11eb-8968-b829a2bc8a3b.png)
 
 
 ## Self-healing (Liveness Probe)
