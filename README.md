@@ -840,6 +840,12 @@ helm install --name my-kafka --namespace kafka incubator/kafka
 
 kubectl get all -n kafka
 ``` 
+
+- Topic 생성 및 확인
+``` 
+kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-zookeeper:2181 --topic courseTP --create --partitions 1 --replication-factor 1
+kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-zookeeper:2181 --list
+``` 
 설치 후 서비스 재기동
 
 ## Autoscale (HPA)
