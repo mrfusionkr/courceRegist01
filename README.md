@@ -852,6 +852,7 @@ kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-z
 
 
 ## Config Map
+professorevaluation:v1.2
 ConfigMap을 사용하여 변경가능성이 있는 설정을 관리
 
 - 담당교수평가(professorEvaluation) 서비스에서 동기호출(Req/Res방식)로 연결되는 교과관리(courseManagement) 서비스 url 정보 일부를 ConfigMap을 사용하여 구현
@@ -899,13 +900,15 @@ http GET http://52.231.9.211:8080/courseManagements/1
 
 
 ## Circuit Breaker
+professorevaluation:v1.5
+coursemanagement:v1.8
 서킷 브레이킹 프레임워크의 선택: Spring FeignClient + Hystrix 옵션을 사용하여 구현함
-시나리오는 심사결과등록(입찰심사:BiddingExamination)-->낙찰자정보등록(입찰관리:BiddingManagement) 시의 연결을 RESTful Request/Response 로 연동하여 구현이 되어있고, 낙찰자정보등록이 과도할 경우 CB 를 통하여 장애격리.
+시나리오는 당당교수확정등록(담당교수평가:ProfessorEvaluation)--> 담당교수정보덩록(교과관리:CourseManagement) 시의 연결을 RESTful Request/Response 로 연동하여 구현이 되어있고, 담당교수정보등록이 과도할 경우 CB 를 통하여 장애격리.
 
 
 - Hystrix 를 설정: 요청처리 쓰레드에서 처리시간이 1000ms가 넘어서기 시작하면 CB 작동하도록 설정
 
-**application.yml (BiddingExamination)**
+**application.yml (ProfessorEvaluation)**
 ```
 feign:
   hystrix:
@@ -916,27 +919,30 @@ hystrix:
     default:
       execution.isolation.thread.timeoutInMilliseconds: 1000
 ```
-![image](https://user-images.githubusercontent.com/70736001/122508631-3a9ecc00-d03d-11eb-9bce-a786225df40f.png)
+![image](https://user-images.githubusercontent.com/70736001/124458124-9603e480-ddc7-11eb-9392-73b116d52d7e.png)
 
-- 피호출 서비스(입찰관리:biddingmanagement) 의 임의 부하 처리 - 800ms에서 증감 300ms 정도하여 800~1100 ms 사이에서 발생하도록 처리
-BiddingManagementController.java
+- 피호출 서비스(교과관리:coursemanagement) 의 임의 부하 처리 - 800ms에서 증감 300ms 정도하여 800~1100 ms 사이에서 발생하도록 처리
+CourseManagementController.java
 ```
 req/res를 처리하는 피호출 function에 sleep 추가
 
 	try {
-	   Thread.sleep((long) (800 + Math.random() * 300));
-	} catch (InterruptedException e) {
-	   e.printStackTrace();
-	}
+            Long lSleepTime = (long)(800 + Math.random() * 300);
+            Thread.sleep(lSleepTime);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 ```
-![image](https://user-images.githubusercontent.com/70736001/122508689-5609d700-d03d-11eb-9e08-8eadc904d391.png)
+![image](https://user-images.githubusercontent.com/70736001/124458375-d9f6e980-ddc7-11eb-878d-3e4a2043fe0a.png)
 
 - req/res 호출하는 위치가 onPostUpdate에 있어 실제로 Data Update가 발생하지 않으면 호출이 되지 않는 문제가 있어 siege를 2개 실행하여 Update가 지속적으로 발생하게 처리 함
 ```
-siege -c2 –t20S  -v --content-type "application/json" 'http://20.194.120.4:8080/biddingExaminations/1 PATCH {"noticeNo":"n01","participateNo":"p01","successBidderFlag":"true"}'
-siege -c2 –t20S  -v --content-type "application/json" 'http://20.194.120.4:8080/biddingExaminations/1 PATCH {"noticeNo":"n01","participateNo":"p01","successBidderFlag":"false"}'
+siege -c2 –t20S  -v --content-type "application/json" 'http://professorEvaluation:8080/professorEvaluations/3 PATCH {"courseNo":"1","professorNo":"204","professorNm":"P04","score":"80","successFlag":"true"}'
+siege -c2 –t20S  -v --content-type "application/json" 'http://professorEvaluation:8080/professorEvaluations/3 PATCH {"courseNo":"1","professorNo":"205","professorNm":"P05","score":"85","successFlag":"true"}'
 ```
-![image](https://user-images.githubusercontent.com/70736001/122508763-7b96e080-d03d-11eb-90f8-8380277cdc17.png)
+![image](https://user-images.githubusercontent.com/70736001/124458694-3f4ada80-ddc8-11eb-82ab-243837a012a5.png)
+![image](https://user-images.githubusercontent.com/70736001/124458794-61445d00-ddc8-11eb-8195-c4d2e3242007.png)
+
 
 
 ## Autoscale (HPA)
