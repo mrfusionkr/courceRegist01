@@ -740,13 +740,12 @@ http GET http://localhost:8081/courseManagements/1     # 담당교수정보 갱�
 - namespace 등록 및 변경
 ```
 kubectl config set-context --current --namespace=professor  --> professor namespace 로 변경
-
 kubectl create ns professor
 ```
 - 서비스별 이미지 정보 수정(deployment.yml)
 ```
-image: user11skccacr.azurecr.io/courseManagement:v1.0
-image: user11skccacr.azurecr.io/professorApplyment:v1.0
+image: user11skccacr.azurecr.io/coursemanagement:v1.0
+image: user11skccacr.azurecr.io/professorapplyment:v1.1
 image: user11skccacr.azurecr.io/professorEvaluation:v1.0
 image: user11skccacr.azurecr.io/notification:v1.0
 image: user11skccacr.azurecr.io/myPage:v1.0
@@ -756,18 +755,22 @@ image: user11skccacr.azurecr.io/courseManagement:v1.0
 
 - ACR 컨테이너이미지 빌드
 ```
-az acr build --registry user11skccacr --image user11skccacr.azurecr.io/courseManagement:v1.0 .
+az acr build --registry user11skccacr --image user11skccacr.azurecr.io/coursemanagement:v1.0 .
 ```
-![image](https://user-images.githubusercontent.com/70736001/122502677-096cce80-d032-11eb-96e7-84a8024ab45d.png)
+![image](https://user-images.githubusercontent.com/70736001/124411005-95972980-dd86-11eb-8d0f-eb48c6cf50c5.png)
+![image](https://user-images.githubusercontent.com/70736001/124411028-9f209180-dd86-11eb-85a3-c4c97d74fa73.png)
+
 
 나머지 서비스에 대해서도 동일하게 등록을 진행함
 ```
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/professorApplyment:v1.0 .
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/professorEvaluation:v1.0 .
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/notification:v1.0  .
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/myPage:v1.0  .
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/gateway:v1.0 .
+az acr build --registry user11skccacr --image user11skccacr.azurecr.io/professorapplyment:v1.0 .
+az acr build --registry user11skccacr --image user11skccacr.azurecr.io/professorevaluation:v1.0 .
+az acr build --registry user11skccacr --image user11skccacr.azurecr.io/notification:v1.0  .
+az acr build --registry user11skccacr --image user11skccacr.azurecr.io/mypage:v1.0  .
+az acr build --registry user11skccacr --image user11skccacr.azurecr.io/gateway:v1.0 .
 ```
+![image](https://user-images.githubusercontent.com/70736001/124413067-ddb84b00-dd8a-11eb-82fe-925d9f91fd33.png)
+
 
 - 배포진행
 
