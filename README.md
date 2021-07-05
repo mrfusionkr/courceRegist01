@@ -895,7 +895,7 @@ http PATCH http://52.231.9.211:8080/professorEvaluations/1 successFlag=true scor
 http GET http://52.231.9.211:8080/courseManagements/1
 ```
 ![image](https://user-images.githubusercontent.com/70736001/124430565-4bc03a80-ddaa-11eb-80d6-6e53b8acba1e.png)
-![image](https://user-images.githubusercontent.com/70736001/124430600-537fdf00-ddaa-11eb-905d-5c0a6a56239b.png)
+![image](https://user-images.githubusercontent.com/70736001/124430940-bffade00-ddaa-11eb-8067-4caceec745b1.png)
 
 
 ## Circuit Breaker
