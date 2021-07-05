@@ -713,53 +713,60 @@ http GET http://localhost:8081/courseManagements/1     # 담당교수정보 갱�
 
 - GitHub 와 연결 후 로컬빌드를 진행 진행
 ```
-	cd team
-	mkdir sourcecode
-	cd sourcecode
-	git clone --recurse-submodules https://github.com/21-2-1team/bidding03.git
+	cd personal	
+	git clone --recurse-submodules https://github.com/mrfusionkr/intensiveSource03.git
 	
-	cd bidding
-	cd BiddingExamination
+	cd intensiveSource03
+	cd personal/intensiveSource03/courseManagement
 	mvn package
 	
-	cd ../BiddingManagement
+	cd personal/intensiveSource03/professorApplyment
 	mvn package
 	
-	cd ../BiddingParticipation
+	cd personal/intensiveSource03/professorEvaluation
 	mvn package
 	
-	cd ../MyPage
-	mvn package
-	
-	
-	cd ../Notification
+	cd personal/intensiveSource03/notification
 	mvn package
 	
 	
-	cd ../gateway
+	cd personal/intensiveSource03/myPage
+	mvn package
+	
+	
+	cd personal/intensiveSource03/gateway
         mvn package
 ```
 - namespace 등록 및 변경
 ```
-kubectl config set-context --current --namespace=bidding  --> bidding namespace 로 변경
+kubectl config set-context --current --namespace=professor  --> professor namespace 로 변경
 
-kubectl create ns bidding
+kubectl create ns professor
+```
+- 서비스별 이미지 정보 수정(deployment.yml)
+```
+image: user11skccacr.azurecr.io/courseManagement:v1.0
+image: user11skccacr.azurecr.io/professorApplyment:v1.0
+image: user11skccacr.azurecr.io/professorEvaluation:v1.0
+image: user11skccacr.azurecr.io/notification:v1.0
+image: user11skccacr.azurecr.io/myPage:v1.0
+image: user11skccacr.azurecr.io/courseManagement:v1.0
+
 ```
 
 - ACR 컨테이너이미지 빌드
 ```
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/biddingexamination:latest .
+az acr build --registry user11skccacr --image user11skccacr.azurecr.io/courseManagement:v1.0 .
 ```
 ![image](https://user-images.githubusercontent.com/70736001/122502677-096cce80-d032-11eb-96e7-84a8024ab45d.png)
 
 나머지 서비스에 대해서도 동일하게 등록을 진행함
 ```
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/biddingmanagement:latest .
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/biddingparticipation:latest .
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/biddingparticipation:latest .
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/mypage:latest  .
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/notification:latest  .
-az acr build --registry user01skccacr --image user01skccacr.azurecr.io/gateway:latest .
+az acr build --registry user01skccacr --image user01skccacr.azurecr.io/professorApplyment:v1.0 .
+az acr build --registry user01skccacr --image user01skccacr.azurecr.io/professorEvaluation:v1.0 .
+az acr build --registry user01skccacr --image user01skccacr.azurecr.io/notification:v1.0  .
+az acr build --registry user01skccacr --image user01skccacr.azurecr.io/myPage:v1.0  .
+az acr build --registry user01skccacr --image user01skccacr.azurecr.io/gateway:v1.0 .
 ```
 
 - 배포진행
