@@ -32,15 +32,17 @@
 
   - [Deploy]
 
-  - [Autoscale (HPA)]
-
   - [Config Map]
+
+  - [Circuit Breaker]
+  
+  - [Autoscale (HPA)]
 
   - [Zero-Downtime deploy (Readiness Probe)] 
 
   - [Self-healing (Liveness Probe)]
 
-  - [Circuit Breaker]
+
 
 # 서비스 시나리오
 
@@ -848,6 +850,95 @@ kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-z
 ``` 
 설치 후 서비스 재기동
 
+
+## Config Map
+ConfigMap을 사용하여 변경가능성이 있는 설정을 관리
+
+- 담당교수평가(professorEvaluation) 서비스에서 동기호출(Req/Res방식)로 연결되는 교과관리(courseManagement) 서비스 url 정보 일부를 ConfigMap을 사용하여 구현
+
+- 파일 수정
+  - 담당교수평가 소스 (professorEvaluation/src/main/java/professor/external/CourseManagementService.java)
+
+![image](https://user-images.githubusercontent.com/70736001/124429342-ba03fd80-dda8-11eb-8475-c0515b897592.png)
+
+- Yaml 파일 수정
+  - application.yml (BiddingExamination/src/main/resources/application.yml)
+  - deploy yml (BiddingExamination/kubernetes/deployment.yml)
+
+![image](https://user-images.githubusercontent.com/70736001/124429408-d011be00-dda8-11eb-9943-9d5959e90033.png)
+![image](https://user-images.githubusercontent.com/70736001/124429930-7958b400-dda9-11eb-8ae7-51b47ceafc46.png)
+
+
+- Config Map 생성 및 생성 확인
+```
+kubectl create configmap professor-cm --from-literal=url=CourseManagement
+kubectl get cm
+```
+
+![image](https://user-images.githubusercontent.com/70736001/124430071-aad17f80-dda9-11eb-98a5-8ce2d99ca685.png)
+
+```
+kubectl get cm professor-cm -o yaml
+```
+
+![image](https://user-images.githubusercontent.com/70736001/124430231-e0766880-dda9-11eb-80df-24e2a77ca228.png)
+
+```
+kubectl get pod
+```
+
+![image](https://user-images.githubusercontent.com/70736001/124430351-06037200-ddaa-11eb-87b4-3e463c7e9dde.png)
+
+- Req/Rep 테스트
+```
+http PATCH http://52.231.9.211:8080/professorEvaluations/1 successFlag=true score=85
+http GET http://52.231.9.211:8080/courseManagements/1
+```
+![image](https://user-images.githubusercontent.com/70736001/124430565-4bc03a80-ddaa-11eb-80d6-6e53b8acba1e.png)
+![image](https://user-images.githubusercontent.com/70736001/124430600-537fdf00-ddaa-11eb-905d-5c0a6a56239b.png)
+
+
+## Circuit Breaker
+서킷 브레이킹 프레임워크의 선택: Spring FeignClient + Hystrix 옵션을 사용하여 구현함
+시나리오는 심사결과등록(입찰심사:BiddingExamination)-->낙찰자정보등록(입찰관리:BiddingManagement) 시의 연결을 RESTful Request/Response 로 연동하여 구현이 되어있고, 낙찰자정보등록이 과도할 경우 CB 를 통하여 장애격리.
+
+
+- Hystrix 를 설정: 요청처리 쓰레드에서 처리시간이 1000ms가 넘어서기 시작하면 CB 작동하도록 설정
+
+**application.yml (BiddingExamination)**
+```
+feign:
+  hystrix:
+    enabled: true
+
+hystrix:
+  command:
+    default:
+      execution.isolation.thread.timeoutInMilliseconds: 1000
+```
+![image](https://user-images.githubusercontent.com/70736001/122508631-3a9ecc00-d03d-11eb-9bce-a786225df40f.png)
+
+- 피호출 서비스(입찰관리:biddingmanagement) 의 임의 부하 처리 - 800ms에서 증감 300ms 정도하여 800~1100 ms 사이에서 발생하도록 처리
+BiddingManagementController.java
+```
+req/res를 처리하는 피호출 function에 sleep 추가
+
+	try {
+	   Thread.sleep((long) (800 + Math.random() * 300));
+	} catch (InterruptedException e) {
+	   e.printStackTrace();
+	}
+```
+![image](https://user-images.githubusercontent.com/70736001/122508689-5609d700-d03d-11eb-9e08-8eadc904d391.png)
+
+- req/res 호출하는 위치가 onPostUpdate에 있어 실제로 Data Update가 발생하지 않으면 호출이 되지 않는 문제가 있어 siege를 2개 실행하여 Update가 지속적으로 발생하게 처리 함
+```
+siege -c2 –t20S  -v --content-type "application/json" 'http://20.194.120.4:8080/biddingExaminations/1 PATCH {"noticeNo":"n01","participateNo":"p01","successBidderFlag":"true"}'
+siege -c2 –t20S  -v --content-type "application/json" 'http://20.194.120.4:8080/biddingExaminations/1 PATCH {"noticeNo":"n01","participateNo":"p01","successBidderFlag":"false"}'
+```
+![image](https://user-images.githubusercontent.com/70736001/122508763-7b96e080-d03d-11eb-90f8-8380277cdc17.png)
+
+
 ## Autoscale (HPA)
 앞서 CB(Circuit breaker)는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다.
 
@@ -895,42 +986,6 @@ watch kubectl get al
 3.부하발생 결과
 
 ![image](https://user-images.githubusercontent.com/70736001/122504389-31a9fc80-d035-11eb-976e-f43261d1a8c2.png)
-
-## Config Map
-ConfigMap을 사용하여 변경가능성이 있는 설정을 관리
-
-- 입찰심사(BiddingExamination) 서비스에서 동기호출(Req/Res방식)로 연결되는 입찰관리(BiddingManagement) 서비스 url 정보 일부를 ConfigMap을 사용하여 구현
-
-- 파일 수정
-  - 입찰심사 소스 (BiddingExamination/src/main/java/bidding/external/BiddingManagementService.java)
-
-![image](https://user-images.githubusercontent.com/70736001/122505096-9dd93000-d036-11eb-91b7-0ec57b6e1b10.png)
-
-- Yaml 파일 수정
-  - application.yml (BiddingExamination/src/main/resources/application.yml)
-  - deploy yml (BiddingExamination/kubernetes/deployment.yml)
-
-![image](https://user-images.githubusercontent.com/70736001/122505177-c5c89380-d036-11eb-91b3-f399547b50ff.png)
-
-- Config Map 생성 및 생성 확인
-```
-kubectl create configmap bidding-cm --from-literal=url=BiddingManagement
-kubectl get cm
-```
-
-![image](https://user-images.githubusercontent.com/70736001/122505221-dc6eea80-d036-11eb-8757-b97f8d75baff.png)
-
-```
-kubectl get cm bidding-cm -o yaml
-```
-
-![image](https://user-images.githubusercontent.com/70736001/122505270-f6103200-d036-11eb-8c96-513f95448989.png)
-
-```
-kubectl get pod
-```
-
-![image](https://user-images.githubusercontent.com/70736001/122505313-0fb17980-d037-11eb-9b57-c0d14f468a1c.png)
 
 
 ## Zero-Downtime deploy (Readiness Probe)
@@ -1020,43 +1075,3 @@ siege -c100 -t5S -v --content-type "application/json" 'http://20.194.120.4:8080/
 2.배포 후
 
 ![image](https://user-images.githubusercontent.com/70736001/122506831-0c6bbd00-d03a-11eb-880c-dc8d3e00798f.png)
-
-## Circuit Breaker
-서킷 브레이킹 프레임워크의 선택: Spring FeignClient + Hystrix 옵션을 사용하여 구현함
-시나리오는 심사결과등록(입찰심사:BiddingExamination)-->낙찰자정보등록(입찰관리:BiddingManagement) 시의 연결을 RESTful Request/Response 로 연동하여 구현이 되어있고, 낙찰자정보등록이 과도할 경우 CB 를 통하여 장애격리.
-
-
-- Hystrix 를 설정: 요청처리 쓰레드에서 처리시간이 1000ms가 넘어서기 시작하면 CB 작동하도록 설정
-
-**application.yml (BiddingExamination)**
-```
-feign:
-  hystrix:
-    enabled: true
-
-hystrix:
-  command:
-    default:
-      execution.isolation.thread.timeoutInMilliseconds: 1000
-```
-![image](https://user-images.githubusercontent.com/70736001/122508631-3a9ecc00-d03d-11eb-9bce-a786225df40f.png)
-
-- 피호출 서비스(입찰관리:biddingmanagement) 의 임의 부하 처리 - 800ms에서 증감 300ms 정도하여 800~1100 ms 사이에서 발생하도록 처리
-BiddingManagementController.java
-```
-req/res를 처리하는 피호출 function에 sleep 추가
-
-	try {
-	   Thread.sleep((long) (800 + Math.random() * 300));
-	} catch (InterruptedException e) {
-	   e.printStackTrace();
-	}
-```
-![image](https://user-images.githubusercontent.com/70736001/122508689-5609d700-d03d-11eb-9e08-8eadc904d391.png)
-
-- req/res 호출하는 위치가 onPostUpdate에 있어 실제로 Data Update가 발생하지 않으면 호출이 되지 않는 문제가 있어 siege를 2개 실행하여 Update가 지속적으로 발생하게 처리 함
-```
-siege -c2 –t20S  -v --content-type "application/json" 'http://20.194.120.4:8080/biddingExaminations/1 PATCH {"noticeNo":"n01","participateNo":"p01","successBidderFlag":"true"}'
-siege -c2 –t20S  -v --content-type "application/json" 'http://20.194.120.4:8080/biddingExaminations/1 PATCH {"noticeNo":"n01","participateNo":"p01","successBidderFlag":"false"}'
-```
-![image](https://user-images.githubusercontent.com/70736001/122508763-7b96e080-d03d-11eb-90f8-8380277cdc17.png)
