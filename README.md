@@ -2,7 +2,7 @@
 
 ### Repositories
 
-- https://github.com/21-2-1team/bidding03.git
+- https://github.com/mrfusionkr/courceRegist01.git
 
 
 
