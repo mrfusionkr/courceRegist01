@@ -776,42 +776,42 @@ az acr build --registry user11skccacr --image user11skccacr.azurecr.io/gateway:v
 
 1.bidding/BiddingExamination/kubernetes/deployment.yml 파일 수정 (BiddingManagement/BiddingParticipation/MyPage/Notification/gateway 동일)
 
-![image](https://user-images.githubusercontent.com/70736001/122512566-011d8f00-d044-11eb-8bd5-91d939f7ab1b.png)
+![image](https://user-images.githubusercontent.com/70736001/124417678-a51d6f00-dd94-11eb-8b71-8468148ae227.png)
 
 2.bidding/BiddingExamination/kubernetes/service.yaml 파일 수정 (BiddingManagement/BiddingParticipation/MyPage/Notification 동일)
 
-![image](https://user-images.githubusercontent.com/70736001/122512673-26aa9880-d044-11eb-8587-38f8cd261326.png)
+![image](https://user-images.githubusercontent.com/70736001/124417692-b0709a80-dd94-11eb-9050-d0095b47f4e3.png)
 
 3.bidding/gateway/kubernetes/service.yaml 파일 수정
 
-![image](https://user-images.githubusercontent.com/70736001/122503123-da0a9180-d032-11eb-9283-224d7860c9c3.png)
+![image](https://user-images.githubusercontent.com/70736001/124417721-c3836a80-dd94-11eb-91fd-a02e66a32d09.png)
 
 4. 배포작업 수행
 ``` 
-	cd gateway/kubernetes
+	cd courseManagement/kubernetes
 	kubectl apply -f deployment.yml
 	kubectl apply -f service.yaml
 	
-	cd ../../BiddingExamination/kubernetes
+	cd ../../professorApplyment/kubernetes
 	kubectl apply -f deployment.yml
 	kubectl apply -f service.yaml
 	
-	cd ../../BiddingManagement/kubernetes
-	kubectl apply -f deployment.yml
-	kubectl apply -f service.yaml
-	
-	
-	cd ../../BiddingParticipation/kubernetes
+	cd ../../professorEvaluation/kubernetes
 	kubectl apply -f deployment.yml
 	kubectl apply -f service.yaml
 	
 	
-	cd ../../MyPage/kubernetes
+	cd ../../notification/kubernetes
 	kubectl apply -f deployment.yml
 	kubectl apply -f service.yaml
 	
 	
-	cd ../../Notification/kubernetes
+	cd ../../myPage/kubernetes
+	kubectl apply -f deployment.yml
+	kubectl apply -f service.yaml
+	
+	
+	cd ../../gateway/kubernetes
 	kubectl apply -f deployment.yml
 	kubectl apply -f service.yaml
 ``` 
@@ -820,7 +820,7 @@ az acr build --registry user11skccacr --image user11skccacr.azurecr.io/gateway:v
 ``` 
 kubectl get all
 ``` 
-![image](https://user-images.githubusercontent.com/70736001/122503307-2b1a8580-d033-11eb-83fc-63b0f2154e3b.png)
+![image](https://user-images.githubusercontent.com/70736001/124417605-71424980-dd94-11eb-8621-b9d697754394.png)
 
 - Kafka 설치
 ``` 
