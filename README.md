@@ -946,14 +946,16 @@ siege -c2 –t20S  -v --content-type "application/json" 'http://professorEvaluat
 
 
 ## Autoscale (HPA)
+coursemanagement:v1.9
+professorevaluation:v1.6(원복)
 앞서 CB(Circuit breaker)는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다.
 
-- 리소스에 대한 사용량 정의(bidding/BiddingManagement/kubernetes/deployment.yml)
+- 리소스에 대한 사용량 정의(professor/courseManagement/kubernetes/deployment.yml)
 ![image](https://user-images.githubusercontent.com/70736001/122503960-49cd4c00-d034-11eb-8ab4-b322e7383cc0.png)
 
 - Autoscale 설정 (request값의 20%를 넘어서면 Replica를 10개까지 동적으로 확장)
 ```
-kubectl autoscale deployment biddingmanagement --cpu-percent=20 --min=1 --max=10
+kubectl autoscale deployment coursemanagement --cpu-percent=20 --min=1 --max=10
 ```
 
 - siege 생성 (로드제너레이터 설치)
@@ -963,7 +965,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: siege
-  namespace: bidding
+  namespace: professor
 spec:
   containers:
   - name: siege
@@ -972,26 +974,26 @@ EOF
 ```
 - 부하발생 (50명 동시사용자, 30초간 부하)
 ```
-kubectl exec -it pod/siege  -c siege -n bidding -- /bin/bash
-siege -c50 -t30S -v --content-type "application/json" 'http://52.231.8.61:8080/biddingManagements POST {"noticeNo":1,"title":"AAA"}'
+kubectl exec -it pod/siege -c siege -n professor -- /bin/bash
+siege -c50 -t30S -v --content-type "application/json" 'http://courseManagement:8080/courseManagements POST {"courseNo":1,"title":"국어","courseInfo":"국어과목","dueDate":"2021-07-10"}'
 ```
 - 모니터링 (부하증가로 스케일아웃되어지는 과정을 별도 창에서 모니터링)
 ```
-watch kubectl get al
+watch kubectl get all
 ```
 - 자동스케일아웃으로 Availablity 100% 결과 확인 (시간이 좀 흐른 후 스케일 아웃이 벌어지는 것을 확인, siege의 로그를 보아도 전체적인 성공률이 높아진 것을 확인함)
 
 1.테스트전
 
-![image](https://user-images.githubusercontent.com/70736001/122504322-0aebc600-d035-11eb-883f-35110d9d0457.png)
+![image](https://user-images.githubusercontent.com/70736001/124522323-d138fe80-de2d-11eb-9a50-79b3a0801f0e.png)
 
 2.테스트후
 
-![image](https://user-images.githubusercontent.com/70736001/122504349-1e972c80-d035-11eb-814e-a5ab909215c4.png)
+![image](https://user-images.githubusercontent.com/70736001/124522328-d6964900-de2d-11eb-88ce-341a667119b3.png)
 
 3.부하발생 결과
 
-![image](https://user-images.githubusercontent.com/70736001/122504389-31a9fc80-d035-11eb-976e-f43261d1a8c2.png)
+![image](https://user-images.githubusercontent.com/70736001/124522364-faf22580-de2d-11eb-93d7-35cb44ac9b93.png)
 
 
 ## Zero-Downtime deploy (Readiness Probe)
