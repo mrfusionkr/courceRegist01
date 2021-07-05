@@ -1044,11 +1044,11 @@ siege -c50 -t30S -v --content-type "application/json" 'http://courseManagement:8
 쿠버네티스는 각 컨테이너의 상태를 주기적으로 체크(Health Check)해서 문제가 있는 컨테이너는 자동으로재시작한다.
 
 - depolyment.yml 파일의 path 및 port를 잘못된 값으로 변경
-  depolyment.yml(BiddingManagement/kubernetes/deployment.yml)
+  depolyment.yml(courseManagement/kubernetes/deployment.yml)
 ```
  livenessProbe:
     httpGet:
-        path: '/biddingmanagement/failed'
+        path: '/coursemanagement/failed'
         port: 8090
       initialDelaySeconds: 30
       timeoutSeconds: 2
@@ -1066,8 +1066,8 @@ siege -c50 -t30S -v --content-type "application/json" 'http://courseManagement:8
 
 1.배포 전
 
-![image](https://user-images.githubusercontent.com/70736001/122506797-fb22b080-d039-11eb-9a0b-754e0fea45b2.png)
+![image](https://user-images.githubusercontent.com/70736001/124523695-16abfa80-de33-11eb-8b7d-582e1c37d9cb.png)
 
 2.배포 후
 
-![image](https://user-images.githubusercontent.com/70736001/122506831-0c6bbd00-d03a-11eb-880c-dc8d3e00798f.png)
+![image](https://user-images.githubusercontent.com/70736001/124523692-11e74680-de33-11eb-94ab-c2e2249b5106.png)
